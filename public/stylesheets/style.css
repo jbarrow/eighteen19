@@ -153,3 +153,9 @@ span.floater {
 }
 
 .fill-space { padding-right: 32px; }
+#recaptcha_widget_div { display: none; }
+.captcha_drop { 
+	position: relative;
+	top: 10px;
+	width: 140px;
+}

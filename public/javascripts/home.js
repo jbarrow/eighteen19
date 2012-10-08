@@ -10,7 +10,10 @@ $(document).ready(function() {
 	];
 
 	$("#quote").html(quotes[Math.floor(Math.random() * quotes.length)]);
-
+	if (window.location.pathname == "/request") {
+		$("#login").slideUp();
+		$("#request").slideDown();
+	}
 	$("#request-button").click(function() {
 		$("#login").slideUp();
 		$("#request").slideDown();
@@ -20,4 +23,6 @@ $(document).ready(function() {
 		$("#request").slideUp();
 		$("#login").slideDown();
 	});
+
+	$('.captcha_drop')[0].setAttribute('src', $('#recaptcha_image').children()[0].getAttribute('src'));
 });

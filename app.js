@@ -192,15 +192,15 @@ app.get('/logout', conditionalForward, function(req, res) {
 });
 
 app.get('/request', conditionalForward, notLoggedIn, function(req, res) {
-	res.render('request', { ref_user: '', email: '', message: '', username: '' });
+	res.render('index', { ref_user: '', email: '', message: '', username: '' });
 });
 
 app.post('/request', conditionalForward, notLoggedIn, function(req, res) {
 	request(req.body.ref_user, req.body.email, req.body.username, function(err) {
 		if(err==null) {
-			res.render('request', { message: 'Your request has been sent.  You will receive an email when it is processed', email: req.body.emai, ref_user: req.body.ref_user, username: req.body.username });
+			res.render('index', { message: 'Your request has been sent.  You will receive an email when it is processed', email: req.body.emai, ref_user: req.body.ref_user, username: req.body.username });
 		} else {
-			res.render('request', { message: err, email: req.body.email, ref_user: req.body.ref_user, username: req.body.username });
+			res.render('index', { message: err, email: req.body.email, ref_user: req.body.ref_user, username: req.body.username });
 		}	
 	});
 });

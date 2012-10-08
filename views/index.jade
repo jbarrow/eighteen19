@@ -11,12 +11,15 @@ block content
             br
             input(type='password', name='password', placeholder='password...')
             br
+            img.captcha_drop
             input.captcha(type='text', name='captcha', placeholder='enter the image text...')
             .clear
             br
             button.btn.btn-large.btn-block.btn-primary.sign-in(type='submit') Sign In
             button#request-button.btn.btn-large.btn-block.request(type='button') Request an Account
           form#request.login(action='/request', method='POST')
+            input(type='text', name='username', placeholder='desired username...')
+            br
             input(type='text', name='email', placeholder='email...')
             br
             input(type='text', name='ref_username', placeholder="referrer's username...")
@@ -33,3 +36,4 @@ block content
       a(href='#', title='Configuration Instructions!') Read me to get started!
 
   script(src='/javascripts/home.js')
+  script(src='http://www.google.com/recaptcha/api/challenge?k=6LdscdcSAAAAAELNdtT6gjpzJH43lXzXV0hLQb3r')
