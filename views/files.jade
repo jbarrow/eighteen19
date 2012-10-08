@@ -11,7 +11,7 @@ block content
           #drop_zone.upload-box
             h1 Drag to Select Files
             ul#fileList
-          button#signin-button.btn.btn-large.btn-block.request(type='button') Or Skip this Step 
+          button#skip.btn.btn-large.btn-block.request(type='button') Or Skip this Step 
       p.start
         a(href='#', title='Configuration Instructions!') Read me to get started!
     #available.container(style='padding-top: 60px;')
@@ -23,7 +23,7 @@ block content
           input.search(type='text', name='search', placeholder='search 1500 files from 5 peers...', data-peers='0', data-files='0')
           span.floater
             img(src='img/ajax-loader.gif')
-          button#signin-button.btn.btn-large.btn-block.request(type='button') Upload More Files
+          button#upload-more.btn.btn-large.btn-block.request(type='button') Upload More Files
           .clear
           #files
             ul

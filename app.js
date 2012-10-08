@@ -41,12 +41,6 @@ function hash(pwd, salt, callback) {
 	});
 }
 
-var salt = generateSalt(function(salt) {
-	hash('password', salt, function(password) {
-		db.users.insert({ username: 'jbarrow', salt: salt, hash: password, captcha: '12345678' });
-	});
-});
-
 /**
  * Application Code
  */
@@ -238,3 +232,68 @@ var server = http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
 });
 var io = require('socket.io').listen(server);
+
+
+// START SERVER SIDE IO STUFF.
+
+var clients = [];
+
+io.set('log level', 1);
+
+app.use(express.static(__dirname + '/public'));
+
+io.sockets.on('connection', function(socket) {
+	// Got the Socket Connection
+
+	socket.emit('client_list', clients.map(function(object) {return object.data;}));
+
+	var newClient = {data: {id: socket.id, files:[]}, conn: socket};
+	clients.push(newClient);
+	socket.broadcast.emit('new_peer', newClient.data);
+
+	//console.log(clients);
+
+	socket.on('sharing_files', function(data) {
+		findClient(socket.id, function(client) {
+			client.data.files = data;
+		});
+		socket.broadcast.emit('sharing_files', {peer_id: socket.id, files: data});
+	});
+
+	socket.on('request_file', function(data) {
+		sendMessageToClient(data.to, 'file_requested', {from: socket.id, file_name: data.fileName});
+	});
+
+	socket.on('send_data', function(data) {
+		sendMessageToClient(data.to, 'receive_data' + data.body.file_name, data.body);
+	});
+
+	socket.on('disconnect', function() {
+		removeClient(socket.id);
+		socket.broadcast.emit('peer_disconnect', {id: socket.id});
+	});
+});
+
+function findClient(id, callback) {
+	for(var i = 0; i < clients.length; i++) {
+		if(clients[i].data.id == id) {
+			callback(clients[i]);
+			return;
+		}
+	}
+}
+
+function sendMessageToClient(id, name, msg) {
+	findClient(id, function(socket) { 
+		socket.conn.emit(name,msg);
+	})
+}
+
+function removeClient(id) {
+	for(var i = 0; i < clients.length; i++) {
+		if(clients[i].data.id == id) {
+			clients.splice(i,1);
+			return;
+		}
+	}
+}
