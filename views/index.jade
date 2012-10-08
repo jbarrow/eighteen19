@@ -2,6 +2,7 @@ extends layout
 
 block content
   h1 Login
+  span= message
   form(method='post', action='/login')
     | Username:
     input(type="text", value=username, name="username")
