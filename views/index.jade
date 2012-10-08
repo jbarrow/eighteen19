@@ -1,0 +1,13 @@
+extends layout
+
+block content
+  h1 Login
+  form(method='post', action='/login')
+    | Username:
+    input(type="text", value=username, name="username")
+    | Password
+    input(type="password", name="password")
+    | CAPTCHA
+    input(type="text", value=captcha, name="captcha")
+
+    input(type="submit", value="Login")
