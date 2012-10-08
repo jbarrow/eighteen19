@@ -140,11 +140,11 @@ function generateUserData(type) {
 function request(ref_user, email, username, fn) {
 	var new_user = db.users.findOne({ 'username': username }, function(err, user) {
 		if(user) return fn(new Error('Sorry, but your username has already been selected.  Choose a new one.'));
-		
+		if(username.length < 6 || username.length > 20) return fn(new Error('Your username must be between 6 and 20 characters'));
+		if(email.length < 4 || email.length > 100) return fn(new Error('Please enter a valid email address'));
 		db.users.findOne({ 'username' : ref_user }, function(err, referrer) {
 			if(!referrer) return fn(new Error('Your referrer seems not to exist.  Did you type their username in correctly?'));
-
-			//
+			
 		});
 	});
 }
@@ -175,7 +175,13 @@ app.get('/request', conditionalForward, notLoggedIn, function(req, res) {
 });
 
 app.post('/request', conditionalForward, notLoggedIn, function(req, res) {
-
+	request(req.body.ref_user, req.body.email, req.body.username, function(err, user) {
+		if(user) {
+			res.render('request', { message: '<h1>Your request has been sent.  You will receive an email when it is processed</h1>', email: req.body.emai, ref_user: req.body.ref_user, username: req.body.username });
+		} else {
+			res.render('request', { message: err, email: req.body.email, ref_user: req.body.ref_user, username: req.body.username });
+		}	
+	});
 });
 
 app.post('/login', conditionalForward, notLoggedIn, function(req, res) {

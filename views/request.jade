@@ -3,10 +3,12 @@ extends layout
 block content
   h1 Login
   span= message
-  form(method='post', action='/login')
+  form(method='post', action='/request')
     | Refferer's Username:
     input(type="text", value=ref_user, name="ref_user")
     | Your Email
     input(type="text", value=email, name="email")
+    | Desired Username
+    input(type="text", value=username, name="username")
 
     input(type="submit", value="Login")
