@@ -1,11 +1,7 @@
-!!! 5
-html
-  head
-    title 1819.
-    link(href='css/bootstrap.min.css', rel='stylesheet')
-    link(href='css/style.css', rel='stylesheet')
-    script(src='js/application.js')
-  body
+extends layout
+
+block content
+  .div
     #upload.container(style='padding-top: 60px;')
       .row
         .span12
@@ -35,7 +31,5 @@ html
               li You are either using an old browser or the site isn't working.
       p.start
         a(href='#', title='Configuration Instructions!') Read me to get started!
-    script(src='http://code.jquery.com/jquery-latest.js')
     script(src='/socket.io/socket.io.js')
-    script(src='js/bootstrap.min.js')
-    script(type='text/javascript', src='/js/application.js')
+    script(type='text/javascript', src='/javascripts/application.js')

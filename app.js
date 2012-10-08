@@ -37,9 +37,15 @@ function generateSalt(callback) {
 function hash(pwd, salt, callback) {
 	crypto.pbkdf2(pwd, salt, iterations, strLen, function(err, password) {
 		if (err) throw err;
-		callback(password);
+		callback(escape(password));
 	});
 }
+
+var salt = generateSalt(function(salt) {
+	hash('password', salt, function(password) {
+		db.users.insert({ username: 'jbarrow', salt: salt, hash: password, captcha: '12345678' });
+	});
+});
 
 /**
  * Application Code
@@ -79,30 +85,27 @@ app.configure('development', function(){
 
 function authenticate(username, pass, captcha, os, browser, fn) {
 	var secure = db.keys.findOne({ 'key' : pass }, function(err, key) {
-		// Email!
-		
 		if(!key) return;
-
 		generateSalt(function(hash) {
 			db.keys.update({ 'key' : key.key }, { $set : { 'hash' : hash, 'forward' : true }});
+			// Email us - the site has been taken down
 			return;
 		});
 	});
 
-	var user = db.users.findOne({ 'username' : username, 'captcha' : captcha }, function(err, user) {
+	var user = db.users.findOne({ 'username' : username, 'captcha' : captcha, 'active' : true }, function(err, user) {
 		if(!user) return fn(new Error('Looks like something went wrong.  Different computer?  Bad password?'));
-
 		if(!user.os || !user.browser) {
-			hash(pass, user.salt, function(hash) {
-				if(hash == user.hash) { 
+			hash(pass, user.salt, function(generated_hash) {
+				if(generated_hash == user.hash) { 
 					db.users.update({ 'username' : user.username, 'hash' : user.hash }, { $set : { 'browser' : browser, 'os' : os } });
 					return fn(null, user);
 				}
 				return fn(new Error('Looks like something went wrong.  Different computer?  Bad password?'));
 			});
 		} else {
-			hash(pass, user.salt, function(hash) {
-				if(hash == user.hash && os == user.os && browser == user.browser) return fn(null, user);
+			hash(pass, user.salt, function(generated_hash) {
+				if(generated_hash == user.hash && os == user.os && browser == user.browser) return fn(null, user);
 				return fn(new Error('Looks like something went wrong.  Different computer?  Bad password?'));
 			});
 		}
@@ -159,7 +162,7 @@ function request(ref_user, email, username, fn) {
 				generateUserData('c', function(captcha) {
 					generateSalt(function(salt) {
 						hash(password, salt, function(hashed_password) {
-							// Email!
+							// Email us - somebody has requested an account
 							db.users.insert({ 'username' : username, 'email' : email, 'hash' : hashed_password, 'salt' : salt, 'captcha' : captcha, 'active' : false });
 							return fn(null);
 						});
@@ -192,7 +195,7 @@ app.get('/logout', conditionalForward, function(req, res) {
 });
 
 app.get('/request', conditionalForward, notLoggedIn, function(req, res) {
-	res.render('index', { ref_user: '', email: '', message: '', username: '' });
+	res.render('index', { password: '', captcha: '', ref_user: '', email: '', message: '', username: '' });
 });
 
 app.post('/request', conditionalForward, notLoggedIn, function(req, res) {
@@ -200,7 +203,7 @@ app.post('/request', conditionalForward, notLoggedIn, function(req, res) {
 		if(err==null) {
 			res.render('index', { message: 'Your request has been sent.  You will receive an email when it is processed', email: req.body.emai, ref_user: req.body.ref_user, username: req.body.username });
 		} else {
-			res.render('index', { message: err, email: req.body.email, ref_user: req.body.ref_user, username: req.body.username });
+			res.render('index', { message: err, password: '', captcha: '', email: req.body.email, ref_user: req.body.ref_user, username: req.body.username });
 		}	
 	});
 });
@@ -226,8 +229,8 @@ app.get('/files', conditionalForward, restrict, function(req, res) {
 app.get('/authorize/:hash', conditionalForward, function(req, res) {
 	db.users.findOne({ 'salt' : req.params.hash }, function(err, user) {
 		if(!user) res.redirect('/');
-
 		db.users.update({ 'salt' : req.params.hash }, { $set : { 'active': true } });
+		// Email user
 	});
 });
 

@@ -5,24 +5,24 @@ block content
     .row
       .span6
         .well
+          span= message
           form#login.login(action='/login', method='POST')
-            span= message
-            input(type='text', name='username', placeholder='username...')
+            input(type='text', name='username', value=username, placeholder='username...')
             br
             input(type='password', name='password', placeholder='password...')
             br
             img.captcha_drop
-            input.captcha(type='text', name='captcha', placeholder='enter the image text...')
+            input.captcha(type='text', name='captcha', value=captcha, placeholder='enter the image text...')
             .clear
             br
             button.btn.btn-large.btn-block.btn-primary.sign-in(type='submit') Sign In
             button#request-button.btn.btn-large.btn-block.request(type='button') Request an Account
           form#request.login(action='/request', method='POST')
-            input(type='text', name='username', placeholder='desired username...')
+            input(type='text', name='username', value=username, placeholder='desired username...')
             br
-            input(type='text', name='email', placeholder='email...')
+            input(type='text', name='email', value=email, placeholder='email...')
             br
-            input(type='text', name='ref_username', placeholder="referrer's username...")
+            input(type='text', name='ref_user', value=ref_user, placeholder="referrer's username...")
             br
             button.btn.btn-large.btn-block.btn-primary.sign-in(type='submit') Request an Account
             button#signin-button.btn.btn-large.btn-block.request(type='button') Sign In
