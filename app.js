@@ -118,6 +118,14 @@ function restrict(req, res, next) {
 	}
 }
 
+function notLoggedIn(req, res, next) {
+	if (req.session.user) {
+		res.redirect('/files');
+	} else {
+		next();
+	}
+}
+
 function conditionalForward(req, res, next) {
 	var key = db.keys.findOne({ 'forward' : true }, function(err, key) {
 		if(key) res.redirect('http://www.google.com');
@@ -125,19 +133,35 @@ function conditionalForward(req, res, next) {
 	});
 }
 
+function generateUserData(type) {
+
+}
+
 function request(ref_user, email, username, fn) {
 	var new_user = db.users.findOne({ 'username': username }, function(err, user) {
 		if(user) return fn(new Error('Sorry, but your username has already been selected.  Choose a new one.'));
 		
+		db.users.findOne({ 'username' : ref_user }, function(err, referrer) {
+			if(!referrer) return fn(new Error('Your referrer seems not to exist.  Did you type their username in correctly?'));
 
+			//
+		});
 	});
 }
 
-app.get('/', conditionalForward, function(req, res) {
+app.get('/open/:hash', function(req, res) {
+	db.keys.findOne({ 'hash' : req.params.hash }, function(err, key) {
+		if(!key) res.redirect('http://www.google.com');
+		db.keys.update({ 'hash' : req.params.hash }, { $set : { 'forward' : false }});
+		res.send("1819 back online");
+	});
+});
+
+app.get('/', conditionalForward, notLoggedIn, function(req, res) {
 	res.render('index', { username: '', captcha: '', message: '', ref_user: '', email: '' });
 });
 
-app.get('/login', conditionalForward, function(req, res) {
+app.get('/login', conditionalForward, notLoggedIn, function(req, res) {
 	res.render('index', { username: '', captcha: '', message: '', ref_user: '', email: '' });
 });
 
@@ -146,15 +170,15 @@ app.get('/logout', conditionalForward, function(req, res) {
 	res.redirect('/');
 });
 
-app.get('/request', conditionalForward, function(req, res) {
+app.get('/request', conditionalForward, notLoggedIn, function(req, res) {
 	res.render('request', { ref_user: '', email: '', message: '', username: '' });
 });
 
-app.post('/request', conditionalForward, function(req, res) {
+app.post('/request', conditionalForward, notLoggedIn, function(req, res) {
 
 });
 
-app.post('/login', conditionalForward, function(req, res) {
+app.post('/login', conditionalForward, notLoggedIn, function(req, res) {
 	var ua = uaParser.parse(req.headers['user-agent']);
 	authenticate(req.body.username, req.body.password, req.body.captcha, ua.os, ua.family, function(err, user) {
 		if(user) {
@@ -172,9 +196,9 @@ app.get('/files', conditionalForward, restrict, function(req, res) {
 	res.render('files', { username: '', captcha: 'It Worked!', message: 'Congratulations, motherfucker!' });
 });
 
-app.get('/authorize/:hash', conditionalForward, function(req, res) {});
-
-app.get('/open/:hash', function(req, res) {});
+app.get('/authorize/:hash', conditionalForward, function(req, res) {
+	
+});
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
