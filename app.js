@@ -148,8 +148,8 @@ function generateUserData(type, callback) {
 }
 
 function request(ref_user, email, username, fn) {
-	var new_user = db.users.findOne({ 'username': username }, function(err, user) {
-		if(user) return fn(new Error('Sorry, but your username has already been selected.  Choose a new one.'));
+	var new_user = db.users.findOne({ $or : [ { 'username' : username }, { 'email' : email } ] }, function(err, user) {
+		if(user) return fn(new Error('Sorry, but your username or email has already been selected.  Choose a new one.'));
 		if(username.length < 6 || username.length > 20) return fn(new Error('Your username must be between 6 and 20 characters'));
 		if(email.length < 4 || email.length > 100) return fn(new Error('Please enter a valid email address'));
 		db.users.findOne({ 'username' : ref_user }, function(err, referrer) {
@@ -160,7 +160,7 @@ function request(ref_user, email, username, fn) {
 					generateSalt(function(salt) {
 						hash(password, salt, function(hashed_password) {
 							// Email!
-							db.users.insert({ 'username' : username, 'email' : email, 'hash' : hashed_password, 'salt' : salt, 'captcha' : captcha });
+							db.users.insert({ 'username' : username, 'email' : email, 'hash' : hashed_password, 'salt' : salt, 'captcha' : captcha, 'active' : false });
 							return fn(null);
 						});
 					});
@@ -220,11 +220,15 @@ app.post('/login', conditionalForward, notLoggedIn, function(req, res) {
 });
 
 app.get('/files', conditionalForward, restrict, function(req, res) {
-	res.render('files', { username: '', captcha: 'It Worked!', message: 'Congratulations, motherfucker!' });
+	res.render('files');
 });
 
 app.get('/authorize/:hash', conditionalForward, function(req, res) {
-	
+	db.users.findOne({ 'salt' : req.params.hash }, function(err, user) {
+		if(!user) res.redirect('/');
+
+		db.users.update({ 'salt' : req.params.hash }, { $set : { 'active': true } });
+	});
 });
 
 var server = http.createServer(app).listen(app.get('port'), function(){
