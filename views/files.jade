@@ -1,0 +1,40 @@
+!!! 5
+html
+  head
+    title 1819.
+    link(href='css/bootstrap.min.css', rel='stylesheet')
+    link(href='css/styles.css', rel='stylesheet')
+  body
+    #upload.container(style='padding-top: 60px;')
+      .row
+        .span12
+          h1.title
+            | 1819.
+            span Upload Files
+          #drop_zone.upload-box
+            h1 Drag to Select Files
+            ul#fileList
+          button#signin-button.btn.btn-large.btn-block.request(type='button') Or Skip this Step 
+      p.start
+        a(href='#', title='Configuration Instructions!') Read me to get started!
+    #available.container(style='padding-top: 60px;')
+      .row
+        .span12
+          h1.title
+            | 1819.
+            span Available Files
+          input.search(type='text', name='search', placeholder='search 1500 files from 5 peers...', data-peers='0', data-files='0')
+          span.floater
+            img(src='img/ajax-loader.gif')
+          button#signin-button.btn.btn-large.btn-block.request(type='button') Upload More Files
+          .clear
+          #files
+            ul
+              li Could not Load Websocket
+              li You are either using an old browser or the site isn't working.
+      p.start
+        a(href='#', title='Configuration Instructions!') Read me to get started!
+    script(src='http://code.jquery.com/jquery-latest.js')
+    script(src='/socket.io/socket.io.js')
+    script(src='js/bootstrap.min.js')
+    script(type='text/javascript', src='/js/application.js')
