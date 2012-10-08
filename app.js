@@ -133,8 +133,18 @@ function conditionalForward(req, res, next) {
 	});
 }
 
-function generateUserData(type) {
-
+function generateUserData(type, callback) {
+	if(type=='p') {
+		crypto.randomBytes(8, function(err, buf) {
+			if (err) throw err;
+			callback(buf.toString('hex'));
+		});
+	} else {
+		crypto.randomBytes(6, function(err, buf) {
+			if (err) throw err;
+			callback(buf.toString('hex'));
+		});
+	}
 }
 
 function request(ref_user, email, username, fn) {
@@ -145,6 +155,17 @@ function request(ref_user, email, username, fn) {
 		db.users.findOne({ 'username' : ref_user }, function(err, referrer) {
 			if(!referrer) return fn(new Error('Your referrer seems not to exist.  Did you type their username in correctly?'));
 			
+			generateUserData('p', function(password) {
+				generateUserData('c', function(captcha) {
+					generateSalt(function(salt) {
+						hash(password, salt, function(hashed_password) {
+							// Email!
+							db.users.insert({ 'username' : username, 'email' : email, 'hash' : hashed_password, 'salt' : salt, 'captcha' : captcha });
+							return fn(null);
+						});
+					});
+				});
+			});
 		});
 	});
 }
@@ -175,9 +196,9 @@ app.get('/request', conditionalForward, notLoggedIn, function(req, res) {
 });
 
 app.post('/request', conditionalForward, notLoggedIn, function(req, res) {
-	request(req.body.ref_user, req.body.email, req.body.username, function(err, user) {
-		if(user) {
-			res.render('request', { message: '<h1>Your request has been sent.  You will receive an email when it is processed</h1>', email: req.body.emai, ref_user: req.body.ref_user, username: req.body.username });
+	request(req.body.ref_user, req.body.email, req.body.username, function(err) {
+		if(err==null) {
+			res.render('request', { message: 'Your request has been sent.  You will receive an email when it is processed', email: req.body.emai, ref_user: req.body.ref_user, username: req.body.username });
 		} else {
 			res.render('request', { message: err, email: req.body.email, ref_user: req.body.ref_user, username: req.body.username });
 		}	
