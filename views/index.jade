@@ -1,14 +1,35 @@
 extends layout
 
 block content
-  h1 Login
-  span= message
-  form(method='post', action='/login')
-    | Username:
-    input(type="text", value=username, name="username")
-    | Password
-    input(type="password", name="password")
-    | CAPTCHA
-    input(type="text", value=captcha, name="captcha")
+  .container(style='padding-top: 60px;')
+    .row
+      .span6
+        .well
+          form#login.login(action='/login', method='POST')
+            span= message
+            input(type='text', name='username', placeholder='username...')
+            br
+            input(type='password', name='password', placeholder='password...')
+            br
+            input.captcha(type='text', name='captcha', placeholder='enter the image text...')
+            .clear
+            br
+            button.btn.btn-large.btn-block.btn-primary.sign-in(type='submit') Sign In
+            button#request-button.btn.btn-large.btn-block.request(type='button') Request an Account
+          form#request.login(action='/request', method='POST')
+            input(type='text', name='email', placeholder='email...')
+            br
+            input(type='text', name='ref_username', placeholder="referrer's username...")
+            br
+            button.btn.btn-large.btn-block.btn-primary.sign-in(type='submit') Request an Account
+            button#signin-button.btn.btn-large.btn-block.request(type='button') Sign In
+      .span6
+        h1.login 1819.
+        h3#quote.quote
+          | I am not a friend to a very energetic government. It is always oppressive.
+        h3.tj
+          | Thomas Jefferson
+    p.start
+      a(href='#', title='Configuration Instructions!') Read me to get started!
 
-    input(type="submit", value="Login")
+  script(src='/javascripts/home.js')
